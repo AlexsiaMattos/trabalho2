@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Disciplina - Prova On-line</title>
+  <link rel="stylesheet" href="css/style.css">
+  <!-- Componentes Globais -->
+  <script src="js/componentes-globais.js"></script>
+  <style>
+    main.prova-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 10px;
+      min-height: calc(100vh - 200px);
+    }
+  </style>
+</head>
+<body>
+
+  <site-header>
+    <h1 slot="titulo">Interação Web - Trabalhos</h1>
+    <p slot="subtitulo">Trabalho 2: Prova On-line</p>
+  </site-header>
+
+  <site-nav></site-nav>
+
+  <main class="prova-container">
+    <h2>Página da Prova On-line</h2>
+    <p>Responda às perguntas abaixo:</p>
+
+    <my-test></my-test>
+  </main>
+
+  <site-footer></site-footer>
+
+  <script>
+    class MyTest extends HTMLElement {
+      constructor() {
+        super();
+        this.attachShadow({ mode: 'open' });
+        
+        this.quizData = [
+          {
+            id: "q1",
+            pergunta: "1. Qual tecnologia é responsável por encapsular o CSS e HTML dentro de um Web Component?",
+            alternativas: [
+              "Virtual DOM",
+              "Shadow DOM",
+              "Service Worker"
+            ],
+            correta: 1 
+          },
+          {
+            id: "q2",
+            pergunta: "2. Qual método nativo do JavaScript é utilizado para registrar um novo Custom Element?",
+            alternativas: [
+              "document.registerElement()",
+              "customElements.define()",
+              "window.createCustomElement()"
+            ],
+            correta: 1
+          },
+          {
+            id: "q3",
+            pergunta: "3. Qual das opções a seguir NÃO é um tipo de dado primitivo no JavaScript?",
+            alternativas: [
+              "String",
+              "Boolean",
+              "Array"
+            ],
+            correta: 2
+          }
+        ];
+      }
+
+      connectedCallback() {
+        this.render();
+      }
+
+      render() {
+        this.shadowRoot.innerHTML = `
+          <style>
+            :host {
+              display: flex;
+              justify-content: center;
+              width: 100%;
+              box-sizing: border-box;
+            }
+            .card {
+              width: 100%;
+              max-width: 600px;
+              margin: 20px auto;
+              border: 1px solid #dcdfe6;
+              border-radius: 12px;
+              padding: 24px;
+              background-color: #fff0f5;
+              box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+              box-sizing: border-box;
+            }
+            .question-block {
+              margin-bottom: 20px;
+              padding: 16px;
+              background: #ffe4e1;
+              border: 1px solid #f8c8dc;
+              border-radius: 8px;
+            }
+            .question-title {
+              font-weight: 600;
+              margin-bottom: 12px;
+              color: #2c3e50;
+              font-size: 1rem;
+            }
+            .options-group {
+              display: flex;
+              flex-direction: column;
+              gap: 10px;
+            }
+            .option-item {
+              display: flex;
+              align-items: center;
+              gap: 10px;
+              background-color: #ffffff;
+              padding: 10px 14px;
+              border: 1px solid #ced4da;
+              border-radius: 6px;
+              cursor: pointer;
+              transition: background-color 0.2s;
+            }
+            .option-item:hover {
+              background-color: #f0f0f0;
+            }
+            input[type="radio"] {
+              cursor: pointer;
+              width: 18px;
+              height: 18px;
+              flex-shrink: 0;
+            }
+            label {
+              cursor: pointer;
+              font-size: 15px;
+              width: 100%;
+            }
+            .error-message {
+              color: #721c24;
+              background-color: #f8d7da;
+              border: 1px solid #f5c6cb;
+              padding: 10px;
+              border-radius: 6px;
+              margin-bottom: 16px;
+              display: none;
+              font-weight: 500;
+            }
+            .btn {
+              width: 100%;
+              background-color: #F396C0;
+              color: white;
+              border: none;
+              padding: 12px 24px;
+              font-size: 16px;
+              font-weight: bold;
+              border-radius: 6px;
+              cursor: pointer;
+              transition: background-color 0.2s;
+            }
+            .btn:hover {
+              background-color: #DD7EA1;
+            }
+            .score-box {
+              background-color: #d4edda;
+              border: 1px solid #c3e6cb;
+              color: #155724;
+              padding: 16px;
+              border-radius: 6px;
+              font-size: 18px;
+              font-weight: bold;
+              margin-bottom: 20px;
+            }
+            .result-item {
+              padding: 14px;
+              margin-bottom: 12px;
+              border-radius: 6px;
+            }
+            .result-item.correct {
+              background-color: #e8f8f5;
+              border-left: 5px solid #2ecc71;
+            }
+            .result-item.incorrect {
+              background-color: #fdedec;
+              border-left: 5px solid #e74c3c;
+            }
+            .user-ans {
+              font-weight: bold;
+            }
+            .correct-ans {
+              color: #27ae60;
+              font-weight: bold;
+            }
+          </style>
+
+          <div class="card">
+            <form id="quiz-form">
+              <div id="questions-container"></div>
+              <div id="error-msg" class="error-message">⚠️ Por favor, responda a todas as questões antes de enviar.</div>
+              <button type="submit" class="btn">Ver resultado</button>
+            </form>
+
+            <div id="results-container" style="display: none;"></div>
+          </div>
+        `;
+
+        this.renderQuestions();
+        this.setupEvents();
+      }
+
+      renderQuestions() {
+        const container = this.shadowRoot.querySelector('#questions-container');
+        if (!container) return;
+
+        container.innerHTML = '';
+
+        this.quizData.forEach((q, qIndex) => {
+          const qBlock = document.createElement('div');
+          qBlock.className = 'question-block';
+
+          let alternativesHtml = '';
+          q.alternativas.forEach((alt, altIndex) => {
+            const inputId = `q_${qIndex}_alt_${altIndex}`;
+            const inputName = `questao_${qIndex}`;
+            
+            alternativesHtml += `
+              <div class="option-item">
+                <input type="radio" id="${inputId}" name="${inputName}" value="${altIndex}">
+                <label for="${inputId}">${alt}</label>
+              </div>
+            `;
+          });
+
+          qBlock.innerHTML = `
+            <div class="question-title">${q.pergunta}</div>
+            <div class="options-group">
+              ${alternativesHtml}
+            </div>
+          `;
+
+          container.appendChild(qBlock);
+        });
+      }
+
+      setupEvents() {
+        const form = this.shadowRoot.querySelector('#quiz-form');
+        const errorMsg = this.shadowRoot.querySelector('#error-msg');
+        if (!form) return;
+
+        form.addEventListener('submit', (e) => {
+          e.preventDefault();
+
+          const formData = new FormData(form);
+          const respostasUsuario = [];
+          let pendente = false;
+
+          this.quizData.forEach((_, qIndex) => {
+            const valorSelecionado = formData.get(`questao_${qIndex}`);
+
+            if (valorSelecionado === null) {
+              pendente = true;
+            } else {
+              respostasUsuario.push(parseInt(valorSelecionado, 10));
+            }
+          });
+
+          if (pendente) {
+            if (errorMsg) errorMsg.style.display = 'block';
+            return;
+          }
+
+          if (errorMsg) errorMsg.style.display = 'none';
+          this.corrigirProva(respostasUsuario);
+        });
+      }
+
+      corrigirProva(respostasUsuario) {
+        let acertos = 0;
+        const total = this.quizData.length;
+        let detalhamentoHtml = '';
+
+        this.quizData.forEach((q, index) => {
+          const respostaDada = respostasUsuario[index];
+          const gabarito = Number(q.correta);
+          const acertou = respostaDada === gabarito;
+
+          if (acertou) acertos++;
+
+          detalhamentoHtml += `
+            <div class="result-item ${acertou ? 'correct' : 'incorrect'}">
+              <p><strong>${q.pergunta}</strong></p>
+              <p>Sua resposta: <span class="user-ans">${q.alternativas[respostaDada]}</span> ${acertou ? '✅' : '❌'}</p>
+              ${!acertou ? `<p>Resposta correta: <span class="correct-ans">${q.alternativas[gabarito]}</span></p>` : ''}
+            </div>
+          `;
+        });
+
+        const nota = ((acertos / total) * 10).toFixed(1);
+        const porcentagem = Math.round((acertos / total) * 100);
+
+        const form = this.shadowRoot.querySelector('#quiz-form');
+        const resultsContainer = this.shadowRoot.querySelector('#results-container');
+
+        if (form) form.style.display = 'none';
+        if (resultsContainer) {
+          resultsContainer.style.display = 'block';
+          resultsContainer.innerHTML = `
+            <div class="score-box">
+              Nota: ${nota} / 10.0 (${acertos} de ${total} acertos — ${porcentagem}%)
+            </div>
+            <h3>Resumo da Correção:</h3>
+            ${detalhamentoHtml}
+            <button id="btn-restart" class="btn" style="margin-top: 15px;">Responder Novamente</button>
+          `;
+
+          this.shadowRoot.querySelector('#btn-restart').addEventListener('click', () => {
+            resultsContainer.style.display = 'none';
+            form.style.display = 'block';
+            form.reset();
+          });
+        }
+      }
+    }
+
+    customElements.define('my-test', MyTest);
+  </script>
+
+</body>
+</html>

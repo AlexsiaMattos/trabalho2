@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editor de Menus - Trabalho 1</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="js/componentes-globais.js"></script>
+</head>
+<body>
+
+    <site-header>
+        <h1 slot="titulo">Interação Web - Trabalhos</h1>
+        <p slot="subtitulo">Trabalho 1: Editor de Menus</p>
+    </site-header>
+
+    <site-nav></site-nav>
+
+    <main class="editor-container">
+        <section class="form-section">
+            <h2>Formulário de Edição</h2>
+            <form id="menu-form">
+                <fieldset>
+                    <legend>Configurações Gerais</legend>
+                    <label for="bg-color">Cor de Fundo (Menu):</label>
+                    <input type="color" id="bg-color" value="#333333">
+                    
+                    <label for="item-color">Cor de Fundo (Itens):</label>
+                    <input type="color" id="item-color" value="#555555">
+
+                    <label for="text-color">Cor do Texto:</label>
+                    <input type="color" id="text-color" value="#ffffff">
+
+                    <label for="spacing">Espaçamento (px):</label>
+                    <input type="number" id="spacing" value="10" min="0" max="50">
+                    
+                    <label for="menu-image">URL da Imagem (opcional):</label>
+                    <input type="url" id="menu-image" placeholder="https://exemplo.com/img.png">
+                </fieldset>
+
+                <fieldset>
+                    <legend>Itens do Menu</legend>
+                    <div id="items-container"></div>
+                    <button type="button" id="btn-add-item">Adicionar Item</button>
+                    <button type="button" id="btn-remove-item">Remover Último Item</button>
+                </fieldset>
+            </form>
+        </section>
+
+        <section class="preview-section">
+            <h2>Menu Gerado</h2>
+            <div id="menu-preview-container">
+                <img id="preview-image" src="#" alt="Imagem do Menu" style="display: none; max-width: 100px;">
+                <nav id="preview-nav">
+                    <ul id="preview-list"></ul>
+                </nav>
+            </div>
+        </section>
+    </main>
+
+
+    <site-footer></site-footer>
+
+    <script src="js/editor.js"></script>
+</body>
+</html>
